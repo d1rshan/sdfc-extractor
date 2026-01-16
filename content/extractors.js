@@ -4,6 +4,11 @@ async function extractRecord(object, fieldMap, schema) {
     throw new Error("Utility waitForRecordLayout is missing");
   }
   
+  // Try to switch to Details tab first to ensure fields are in DOM
+  if (typeof activateDetailsTab === 'function') {
+     await activateDetailsTab();
+  }
+
   await waitForRecordLayout();
 
   const extractedData = {};
@@ -11,6 +16,8 @@ async function extractRecord(object, fieldMap, schema) {
   // Strategy 1: LWC (Standard Objects)
   const lwcItems = document.querySelectorAll("records-record-layout-item");
   lwcItems.forEach((item) => {
+    if (!isVisible(item)) return;
+
     const labelEl = item.querySelector(".test-id__field-label");
     const valueEl = item.querySelector(".test-id__field-value");
 
@@ -34,6 +41,8 @@ async function extractRecord(object, fieldMap, schema) {
   // Strategy 2: Aura (Tasks / Older Objects)
   const auraItems = document.querySelectorAll(".forcePageBlockItem");
   auraItems.forEach((item) => {
+    if (!isVisible(item)) return;
+
     const labelEl = item.querySelector(".test-id__field-label");
     const valueEl = item.querySelector(".test-id__field-value");
 
