@@ -38,8 +38,8 @@ class ExtractionStatusUI {
         
         .box {
           background: #171717;
-          border-radius: 2px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+          border-radius: 16px;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
           padding: 14px 20px;
           display: flex;
           align-items: center;

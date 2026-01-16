@@ -194,7 +194,7 @@ function App() {
       {/* Header */}
       <header className="bg-background/95 backdrop-blur-sm border-b border-border px-5 py-4 flex items-center justify-between z-20 sticky top-0">
         <div className="flex items-center gap-3">
-           <div className="p-1.5 bg-white rounded-sm">
+           <div className="p-2 bg-white rounded-full">
              <Database className="text-black w-4 h-4" />
            </div>
            <div>
@@ -210,14 +210,14 @@ function App() {
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="flex items-center gap-1.5 bg-surface hover:bg-border text-text-main border border-border px-3 py-1.5 rounded-sm text-sm font-thunder uppercase tracking-wide transition-all duration-200"
+              className="flex items-center gap-1.5 bg-surface hover:bg-border text-text-main border border-border px-4 py-2 rounded-full text-sm font-thunder uppercase tracking-wide transition-all duration-200"
             >
               Export
               <ChevronDown className="w-3 h-3 text-text-muted" />
             </button>
             
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-2 bg-surface border border-border rounded-sm shadow-xl z-30 w-36 overflow-hidden">
+              <div className="absolute right-0 top-full mt-2 bg-surface border border-border rounded-xl shadow-xl z-30 w-36 overflow-hidden">
                 <button 
                   onClick={() => handleExport('csv')}
                   className="flex items-center gap-2 w-full px-4 py-3 text-xs text-text-main hover:bg-border/50 text-left transition-colors font-medium"
@@ -239,7 +239,7 @@ function App() {
           <button 
             onClick={handleExtract}
             disabled={extracting || !pageContext}
-            className="flex items-center gap-1.5 bg-white hover:bg-gray-200 text-black px-4 py-1.5 rounded-sm text-sm font-bold font-thunder uppercase tracking-wide transition-all shadow-lg shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 bg-white hover:bg-gray-200 text-black px-5 py-2 rounded-full text-sm font-bold font-thunder uppercase tracking-wide transition-all shadow-lg shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {extracting ? <RefreshCw className="animate-spin w-3 h-3" /> : <Download className="w-3 h-3" />}
             {getExtractLabel()}
@@ -255,19 +255,19 @@ function App() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-border bg-background overflow-x-auto px-4 gap-6">
+      <div className="flex border-b border-border bg-background overflow-x-auto px-4 py-3 gap-2 no-scrollbar">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all whitespace-nowrap flex items-center gap-2
+            className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 rounded-full
               ${activeTab === tab.id 
-                ? 'border-white text-white' 
-                : 'border-transparent text-text-muted hover:text-white hover:border-border'}`}
+                ? 'bg-white text-black shadow-md transform scale-105' 
+                : 'bg-transparent text-text-muted hover:bg-surface hover:text-white'}`}
           >
             {tab.label}
             <span className={`py-0.5 px-1.5 rounded-full text-[10px] font-mono
-              ${activeTab === tab.id ? 'bg-white text-black' : 'bg-surface text-text-muted'}`}>
+              ${activeTab === tab.id ? 'bg-black text-white' : 'bg-surface text-text-muted'}`}>
               {data[tab.id]?.length || 0}
             </span>
           </button>

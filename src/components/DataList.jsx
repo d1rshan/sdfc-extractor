@@ -34,7 +34,7 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
           <input
             type="text"
             placeholder="SEARCH RECORDS..."
-            className="w-full pl-9 pr-4 py-2 bg-surface border border-border rounded-sm text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-white focus:ring-0 transition-all font-medium uppercase tracking-wide"
+            className="w-full pl-9 pr-4 py-2 bg-surface border border-border rounded-full text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-white focus:ring-0 transition-all font-medium uppercase tracking-wide"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -55,7 +55,7 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
             ) : (
               <div className="space-y-3">
                 {items.map((item, idx) => (
-                  <div key={item.id || idx} className="bg-surface border border-border rounded-sm p-4 hover:border-white/20 transition-all duration-200 relative group">
+                  <div key={item.id || idx} className="bg-surface border border-border rounded-xl p-4 hover:border-white/20 transition-all duration-200 relative group">
                     <button 
                       onClick={() => onDelete(item.id)}
                       className="absolute top-3 right-3 text-text-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110"
