@@ -14,6 +14,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         
         if (!context) {
           console.warn("❌ Unknown Salesforce page context.");
+          sendResponse({ success: false, error: "Unknown Salesforce page context." });
           return;
         }
 
@@ -23,6 +24,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         if (!mapping || !schema) {
           console.warn(`❌ No configuration found for object: ${object}`);
+          sendResponse({ success: false, error: `No configuration found for object: ${object}` });
           return;
         }
 
@@ -42,9 +44,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           payload: { object, data }
         });
 
+        sendResponse({ success: true, count: Array.isArray(data) ? data.length : 1 });
+
       } catch (err) {
         console.error("Extraction failed:", err);
+        sendResponse({ success: false, error: err.message });
       }
     })();
+    return true; // Keep the message channel open for async response
   }
 });

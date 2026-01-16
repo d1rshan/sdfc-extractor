@@ -92,6 +92,7 @@ function App() {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab) {
          setMessage({ type: 'error', text: 'No active tab.' });
+         setExtracting(false);
          return;
       }
       
@@ -99,8 +100,10 @@ function App() {
       chrome.tabs.sendMessage(tab.id, { type: 'EXTRACT_CURRENT_OBJECT' }, (response) => {
         if (chrome.runtime.lastError) {
           setMessage({ type: 'error', text: 'Please reload the Salesforce page.' });
+        } else if (response && response.success) {
+          setMessage({ type: 'success', text: `Extracted ${response.count} record(s)!` });
         } else {
-          setMessage({ type: 'success', text: 'Extraction requested...' });
+          setMessage({ type: 'error', text: response?.error || 'Extraction failed.' });
         }
         setExtracting(false);
         // Clear message after 3s
@@ -119,6 +122,7 @@ function App() {
 
   const getExtractLabel = () => {
     if (extracting) return 'Extracting...';
+    if (!pageContext) return 'No Context';
     if (pageContext) {
       const { object, type } = pageContext;
       const typeLabel = type === 'record' ? 'Record' : type === 'list' ? 'List' : 'Kanban';
@@ -145,8 +149,8 @@ function App() {
 
         <button 
           onClick={handleExtract}
-          disabled={extracting}
-          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50"
+          disabled={extracting || !pageContext}
+          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {extracting ? <RefreshCw className="animate-spin w-3 h-3" /> : <Download className="w-3 h-3" />}
           {getExtractLabel()}
