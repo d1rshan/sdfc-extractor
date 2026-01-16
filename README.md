@@ -2,6 +2,8 @@
 
 A high-performance Chrome Extension (Manifest V3) designed to scrape and manage Salesforce CRM data. Built with React 19, TailwindCSS, and a robust DOM-scraping engine capable of handling dynamic Lightning Experience layouts.
 
+![preview](popup.png)
+
 ## 🚀 Getting Started
 
 ### Installation
