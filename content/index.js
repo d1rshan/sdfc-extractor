@@ -31,6 +31,11 @@ chrome.runtime.onMessage.addListener(async (message) => {
 
     console.log(`✅ ${type} extracted (${object}):`, data);
 
+    chrome.runtime.sendMessage({
+      type: "SAVE_EXTRACTED_DATA",
+      payload: { object, data }
+    });
+
   } catch (err) {
     console.error("Extraction failed:", err);
   }

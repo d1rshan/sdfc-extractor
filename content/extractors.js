@@ -37,11 +37,22 @@ async function extractRecord(object, fieldMap, schema) {
     }
   });
 
+  // Extract ID from URL
+  // URL pattern: /lightning/r/Object/ID/view
+  const urlParts = location.pathname.split('/');
+  const idIndex = urlParts.indexOf('r') + 2; // 'r' is followed by Object, then ID
+  const recordId = (idIndex > 1 && idIndex < urlParts.length) ? urlParts[idIndex] : null;
+
   // Normalize to schema
   const data = {};
   schema.forEach(key => {
     data[key] = extractedData[key] ?? null;
   });
+
+  // Ensure ID is present
+  if (!data.id && recordId) {
+    data.id = recordId;
+  }
 
   return {
     object,
@@ -65,6 +76,9 @@ async function extractListView(object, fieldMap, schema) {
     const recordRaw = {};
     const cells = row.querySelectorAll("td[data-label], th[data-label]");
 
+    // Extract ID from row attribute
+    const recordId = row.getAttribute('data-row-key-value');
+
     cells.forEach((cell) => {
       const label = cell.getAttribute("data-label");
       if (label) {
@@ -84,6 +98,11 @@ async function extractListView(object, fieldMap, schema) {
     schema.forEach(key => {
       normalized[key] = mappedData[key] ?? null;
     });
+
+    // Ensure ID is present
+    if (!normalized.id && recordId) {
+      normalized.id = recordId;
+    }
 
     normalized.extractedAt = Date.now();
     records.push(normalized);
@@ -115,7 +134,17 @@ async function extractKanbanBoard(object, fieldMap, schema) {
       
       // -- Name (Primary Field) --
       const nameEl = card.querySelector('.primaryDisplayField a');
-      if (nameEl) extractedData['name'] = nameEl.innerText.trim();
+      let recordId = null;
+
+      if (nameEl) {
+        extractedData['name'] = nameEl.innerText.trim();
+        // Extract ID from href (e.g., /lightning/r/006...)
+        const href = nameEl.getAttribute('href');
+        if (href) {
+          const match = href.match(/\/([a-zA-Z0-9]{15,18})(\/|$)/);
+          if (match) recordId = match[1];
+        }
+      }
 
       // -- Stage (From Column) --
       // Map standard "Stage" or "Status" keys if present in schema
@@ -159,6 +188,11 @@ async function extractKanbanBoard(object, fieldMap, schema) {
            normalized[key] = null;
         }
       });
+
+      // Ensure ID is present
+      if (!normalized.id && recordId) {
+        normalized.id = recordId;
+      }
 
       normalized.extractedAt = Date.now();
       records.push(normalized);
