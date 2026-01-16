@@ -10,7 +10,7 @@ class ExtractionStatusUI {
     
     this.host = document.createElement('div');
     this.host.id = 'sfdc-extractor-ui-host';
-    this.host.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 999999; font-family: system-ui, -apple-system, sans-serif; pointer-events: none;';
+    this.host.style.cssText = 'position: fixed; bottom: 30px; right: 30px; z-index: 999999; pointer-events: none;';
     
     this.root = this.host.attachShadow({ mode: 'open' });
     document.body.appendChild(this.host);
@@ -27,36 +27,56 @@ class ExtractionStatusUI {
     };
     
     const icon = state === 'loading' ? 
-      `<svg class="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>` :
+      `<svg class="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>` :
       state === 'success' ? 
-      `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>` :
-      `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>` :
+      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
 
     const style = `
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
+        
         .box {
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          padding: 12px 16px;
+          background: #171717;
+          border-radius: 2px;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+          padding: 14px 20px;
           display: flex;
           align-items: center;
-          gap: 12px;
-          border-left: 4px solid ${colors[state]};
-          animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-          min-width: 250px;
-          max-width: 350px;
+          gap: 16px;
+          border-left: 5px solid ${colors[state]};
+          border-top: 1px solid rgba(255,255,255,0.05);
+          border-right: 1px solid rgba(255,255,255,0.05);
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          min-width: 280px;
+          max-width: 400px;
           pointer-events: auto;
+          font-family: 'Oswald', sans-serif;
         }
         .content { display: flex; flex-direction: column; }
-        .title { font-weight: 600; font-size: 14px; color: #1f2937; margin-bottom: 2px; }
-        .subtext { font-size: 12px; color: #6b7280; line-height: 1.2; }
+        .title { 
+          font-weight: 700; 
+          font-size: 16px; 
+          color: #ffffff; 
+          margin-bottom: 2px; 
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .subtext { 
+          font-size: 11px; 
+          color: #a3a3a3; 
+          line-height: 1.3;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: 500;
+        }
         .icon { color: ${colors[state]}; display: flex; flex-shrink: 0; }
-        .animate-spin { animation: spin 1s linear infinite; }
+        .animate-spin { animation: spin 0.8s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        .fading { animation: fadeOut 0.5s ease-out forwards; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.95); } }
+        .fading { animation: fadeOut 0.4s ease-out forwards; }
       </style>
     `;
 
@@ -85,7 +105,7 @@ class ExtractionStatusUI {
             this.host.remove();
             this.host = null;
         }
-      }, 500);
+      }, 400);
     }
   }
 }
