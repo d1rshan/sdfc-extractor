@@ -13,19 +13,19 @@ git clone https://github.com/d1rshan/sdfc-extractor.git
 cd sdfc-extractor
 ```
 
-1. **Install dependencies**:
+2. **Install dependencies**:
 
 ```bash
 npm install
 ```
 
-1. **Build the extension**:
+3. **Build the extension**:
 
 ```bash
 npm run build
 ```
 
-1. **Load into Chrome**:
+4. **Load into Chrome**:
 
 * Open `chrome://extensions/`
 * Enable **Developer mode**
@@ -108,4 +108,3 @@ Data integrity is maintained using `chrome.storage.local` with an atomic update 
 * `/src`: React source code (Popup UI, Dashboard, Hooks).
 * `/background`: Service worker (Storage locks, message passing).
 * `/public`: Manifest V3 and assets.
-
