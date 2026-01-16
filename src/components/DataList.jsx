@@ -8,8 +8,8 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
     const lower = searchTerm.toLowerCase();
-    return data.filter(item => 
-      Object.values(item).some(val => 
+    return data.filter(item =>
+      Object.values(item).some(val =>
         String(val).toLowerCase().includes(lower)
       )
     );
@@ -17,7 +17,7 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
 
   const groupedData = useMemo(() => {
     if (!groupBy) return { 'All': filteredData };
-    
+
     return filteredData.reduce((acc, item) => {
       const key = item[groupBy] || 'Uncategorized';
       if (!acc[key]) acc[key] = [];
@@ -45,18 +45,18 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
         {Object.entries(groupedData).map(([group, items]) => (
           <div key={group} className="mb-6">
             {groupBy && (
-              <h3 className="font-thunder text-lg font-bold text-white mb-3 px-1 sticky top-0 bg-background/95 backdrop-blur-sm py-2 border-b border-border flex justify-between items-center z-0">
+              <h3 className="font-thunder text-lg font-bold text-white mb-3 px-1 bg-background/95 backdrop-blur-sm py-2 border-b border-border flex justify-between items-center z-0">
                 {group} <span className="text-xs font-sans font-medium text-text-muted bg-surface px-2 py-0.5 rounded-full">{items.length}</span>
               </h3>
             )}
-            
+
             {items.length === 0 ? (
-               <div className="text-center text-text-muted py-8 text-sm font-thunder uppercase tracking-widest font-medium">No records found</div>
+              <div className="text-center text-text-muted py-8 text-sm font-thunder uppercase tracking-widest font-medium">No records found</div>
             ) : (
               <div className="space-y-3">
                 {items.map((item, idx) => (
                   <div key={item.id || idx} className="bg-surface border border-border rounded-xl p-4 hover:border-white/20 transition-all duration-200 relative group">
-                    <button 
+                    <button
                       onClick={() => onDelete(item.id)}
                       className="absolute top-3 right-3 text-text-muted hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all transform hover:scale-110"
                       title="Delete"
