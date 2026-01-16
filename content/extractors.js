@@ -93,6 +93,8 @@ async function extractListView(object, fieldMap, schema) {
   const records = [];
 
   rows.forEach((row) => {
+    if (!isVisible(row)) return;
+
     const recordRaw = {};
     let recordId = row.getAttribute('data-row-key-value');
 
@@ -178,6 +180,8 @@ async function extractKanbanBoard(object, fieldMap, schema) {
   const columns = document.querySelectorAll('.runtime_sales_pipelineboardPipelineViewColumn');
 
   columns.forEach(column => {
+    if (!isVisible(column)) return;
+
     // 1. Extract Stage/Status from Column Header
     const headerEl = column.querySelector('.stageHeaderLabel') || column.querySelector('.runtime_sales_pipelineboardPipelineViewColumnHeader');
     const stageName = headerEl ? headerEl.innerText.trim() : null;

@@ -18,9 +18,10 @@ function getPageContext() {
   }
 
   if (mode === 'o' && (path.includes('/list') || path.includes('/home'))) {
-    // Check for Kanban specific elements to distinguish from standard list
-    if (document.querySelector('.runtime_sales_pipelineboardPipelineViewColumn')) {
-      return { object, type: 'kanban' };
+    // Check for VISIBLE Kanban specific elements to distinguish from standard list
+    const kanbanCols = document.querySelectorAll('.runtime_sales_pipelineboardPipelineViewColumn');
+    for (const col of kanbanCols) {
+       if (isVisible(col)) return { object, type: 'kanban' };
     }
     return { object, type: 'list' };
   }
@@ -46,14 +47,16 @@ async function waitForListViewRows(timeout = 10000) {
     const kanbanSelector = '.runtime_sales_pipelineboardPipelineViewColumn';
 
     const check = () => {
-      // Check if we accidentally found Kanban instead
-      if (document.querySelector(kanbanSelector)) {
-        return { success: false, error: "Detected Kanban instead of List View" };
+      // Check if we accidentally found VISIBLE Kanban instead
+      const kanbanCols = document.querySelectorAll(kanbanSelector);
+      for (const col of kanbanCols) {
+         if (isVisible(col)) return { success: false, error: "Detected Kanban instead of List View" };
       }
 
       const rows = document.querySelectorAll(listSelector);
-      if (rows.length > 0) {
-        return { success: true, data: rows };
+      // Check for at least one VISIBLE row
+      for (const row of rows) {
+         if (isVisible(row)) return { success: true, data: rows };
       }
       return null; // Keep waiting
     };
@@ -91,7 +94,10 @@ async function waitForKanbanBoard(timeout = 10000) {
 
     const check = () => {
       const columns = document.querySelectorAll(selector);
-      if (columns.length > 0) return columns;
+      // Check for at least one VISIBLE column
+      for (const col of columns) {
+         if (isVisible(col)) return columns;
+      }
       return null;
     };
 
@@ -118,8 +124,17 @@ async function waitForRecordLayout(timeout = 10000) {
   return new Promise((resolve, reject) => {
     const check = () => {
       const lwcItems = document.querySelectorAll("records-record-layout-item");
+      // Check for at least one VISIBLE LWC item
+      for (const item of lwcItems) {
+        if (isVisible(item)) return true;
+      }
+
       const auraItems = document.querySelectorAll(".forcePageBlockItem");
-      if (lwcItems.length > 0 || auraItems.length > 0) return true;
+      // Check for at least one VISIBLE Aura item
+      for (const item of auraItems) {
+        if (isVisible(item)) return true;
+      }
+
       return false;
     };
 
@@ -191,5 +206,5 @@ async function activateDetailsTab() {
 
   // Give it a moment to trigger the UI update. 
   // The actual element waiting is handled by waitForRecordLayout()
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await new Promise(resolve => setTimeout(resolve, 750));
 }
