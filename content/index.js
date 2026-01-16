@@ -9,21 +9,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "EXTRACT_CURRENT_OBJECT") {
     (async () => {
+      const ui = window.ExtractionUI;
+      
       try {
         const context = getPageContext();
         
         if (!context) {
           console.warn("❌ Unknown Salesforce page context.");
+          ui.show('error', 'Context Not Found', 'Could not detect Salesforce object or view.');
           sendResponse({ success: false, error: "Unknown Salesforce page context." });
           return;
         }
 
         const { object, type } = context;
+        ui.show('loading', `Scanning ${object}...`, `Extracting from ${type} view`);
+
         const mapping = FIELD_MAPPINGS[object];
         const schema = OBJECT_SCHEMAS[object];
 
         if (!mapping || !schema) {
           console.warn(`❌ No configuration found for object: ${object}`);
+          ui.show('error', 'Configuration Missing', `No mapping found for ${object}`);
           sendResponse({ success: false, error: `No configuration found for object: ${object}` });
           return;
         }
@@ -44,10 +50,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           payload: { object, data }
         });
 
-        sendResponse({ success: true, count: Array.isArray(data) ? data.length : 1 });
+        const count = Array.isArray(data) ? data.length : 1;
+        ui.show('success', 'Extraction Complete', `Saved ${count} ${object} record(s)`);
+        sendResponse({ success: true, count });
 
       } catch (err) {
         console.error("Extraction failed:", err);
+        ui.show('error', 'Extraction Failed', err.message || 'Unknown error occurred');
         sendResponse({ success: false, error: err.message });
       }
     })();

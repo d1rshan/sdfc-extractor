@@ -24,6 +24,7 @@
         "content/constants.js",
         "content/utils.js",
         "content/extractors.js",
+        "content/ui.js",
         "content/index.js"
       ]
     }
