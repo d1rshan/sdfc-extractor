@@ -17,7 +17,7 @@ function getPageContext() {
     return { object, type: 'record' };
   }
 
-  if (mode === 'o' && path.includes('/list')) {
+  if (mode === 'o' && (path.includes('/list') || path.includes('/home'))) {
     // Check for Kanban specific elements to distinguish from standard list
     if (document.querySelector('.runtime_sales_pipelineboardPipelineViewColumn')) {
        return { object, type: 'kanban' };
@@ -75,8 +75,10 @@ async function waitForRecordLayout(timeout = 10000) {
 
   return new Promise((resolve, reject) => {
     const check = () => {
-      const items = document.querySelectorAll("records-record-layout-item");
-      if (items.length > 0) return resolve(items);
+      const lwcItems = document.querySelectorAll("records-record-layout-item");
+      const auraItems = document.querySelectorAll(".forcePageBlockItem");
+      
+      if (lwcItems.length > 0 || auraItems.length > 0) return resolve(true);
 
       if (Date.now() - start > timeout) {
         reject("Record layout not found");

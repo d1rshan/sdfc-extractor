@@ -7,33 +7,44 @@ async function extractRecord(object, fieldMap, schema) {
   await waitForRecordLayout();
 
   const extractedData = {};
-  const items = document.querySelectorAll("records-record-layout-item");
-
-  items.forEach((item) => {
-    // Strategy 1: Look for standard Lightning classes (most reliable)
+  
+  // Strategy 1: LWC (Standard Objects)
+  const lwcItems = document.querySelectorAll("records-record-layout-item");
+  lwcItems.forEach((item) => {
     const labelEl = item.querySelector(".test-id__field-label");
     const valueEl = item.querySelector(".test-id__field-value");
 
     if (labelEl && valueEl) {
       const label = labelEl.innerText.trim();
       const value = valueEl.innerText.trim();
+      if (fieldMap[label]) extractedData[fieldMap[label]] = value;
+      return; 
+    }
+
+    // Fallback slot-based
+    const labelElFallback = item.querySelector("span[title]");
+    const valueElFallback = item.querySelector("slot slot");
+    if (labelElFallback && valueElFallback) {
+       const label = labelElFallback.textContent.trim();
+       const value = valueElFallback.textContent.trim();
+       if (fieldMap[label]) extractedData[fieldMap[label]] = value;
+    }
+  });
+
+  // Strategy 2: Aura (Tasks / Older Objects)
+  const auraItems = document.querySelectorAll(".forcePageBlockItem");
+  auraItems.forEach((item) => {
+    const labelEl = item.querySelector(".test-id__field-label");
+    const valueEl = item.querySelector(".test-id__field-value");
+
+    if (labelEl && valueEl) {
+      const label = labelEl.innerText.trim();
+      // Aura values often have nested spans or hidden text, try to get clean text
+      const value = valueEl.innerText.trim();
       
       if (fieldMap[label]) {
         extractedData[fieldMap[label]] = value;
       }
-      return; 
-    }
-
-    // Strategy 2: Fallback to the slot-based approach
-    const labelElFallback = item.querySelector("span[title]");
-    const valueElFallback = item.querySelector("slot slot");
-    
-    if (labelElFallback && valueElFallback) {
-       const label = labelElFallback.textContent.trim();
-       const value = valueElFallback.textContent.trim();
-       if (fieldMap[label]) {
-         extractedData[fieldMap[label]] = value;
-       }
     }
   });
 
@@ -69,27 +80,63 @@ async function extractListView(object, fieldMap, schema) {
 
   await waitForListViewRows();
 
-  const rows = document.querySelectorAll('tbody tr[data-row-key-value]');
+  const rows = document.querySelectorAll('tbody tr');
   const records = [];
 
   rows.forEach((row) => {
     const recordRaw = {};
-    const cells = row.querySelectorAll("td[data-label], th[data-label]");
+    let recordId = row.getAttribute('data-row-key-value');
 
-    // Extract ID from row attribute
-    const recordId = row.getAttribute('data-row-key-value');
+    if (object === 'Task') {
+      // Special handling for Task List View (Aura based, missing data-label)
+      const cells = row.querySelectorAll("td, th");
+      cells.forEach(cell => {
+        // Try to find the edit button which contains the field name in its title
+        // Format: "Edit Subject: Item [Value]" or "Edit Due Date: Item [Value]"
+        const editBtn = cell.querySelector('button[title^="Edit "]');
+        if (editBtn) {
+          const title = editBtn.getAttribute('title');
+          const match = title.match(/Edit (.*?):/);
+          if (match) {
+            const label = match[1].trim(); // e.g., "Subject", "Due Date"
+            // The value is usually in the same cell, often in .uiOutputText or .uiOutputDate
+            // Or just cell.innerText (but cell innerText includes the button text sometimes)
+            // Let's try to find a specific output element first
+            const outputEl = cell.querySelector('.uiOutputText, .uiOutputDate, .outputLookupLink');
+            let value = outputEl ? outputEl.innerText.trim() : cell.innerText.replace(title, '').trim();
+            
+            // Clean up common "Edit ..." noise if innerText fallback was used
+            if (!outputEl) {
+               value = value.replace(/Edit .*/, '').trim();
+            }
 
-    cells.forEach((cell) => {
-      const label = cell.getAttribute("data-label");
-      if (label) {
-        recordRaw[label] = cell.innerText.trim() || null;
-      }
-    });
+            if (label) recordRaw[label] = value;
+          }
+        }
+        
+        // Also look for ID if not found yet (usually in the primary link)
+        if (!recordId) {
+          const link = cell.querySelector('a[data-recordid]');
+          if (link) recordId = link.getAttribute('data-recordid');
+        }
+      });
+
+    } else {
+      // Standard LWC List View
+      const cells = row.querySelectorAll("td[data-label], th[data-label]");
+      cells.forEach((cell) => {
+        const label = cell.getAttribute("data-label");
+        if (label) {
+          recordRaw[label] = cell.innerText.trim() || null;
+        }
+      });
+    }
 
     const normalized = { object };
     const mappedData = {};
 
     Object.entries(fieldMap).forEach(([label, key]) => {
+      // Loose matching for Tasks (e.g. "Subject" vs "Subject")
       if (recordRaw[label] !== undefined) {
         mappedData[key] = recordRaw[label];
       }
@@ -144,6 +191,10 @@ async function extractKanbanBoard(object, fieldMap, schema) {
           const match = href.match(/\/([a-zA-Z0-9]{15,18})(\/|$)/);
           if (match) recordId = match[1];
         }
+        // Task Kanban specific: ID might be in data-recordid of the link
+        if (!recordId && nameEl.hasAttribute('data-recordid')) {
+           recordId = nameEl.getAttribute('data-recordid');
+        }
       }
 
       // -- Stage (From Column) --
@@ -158,6 +209,16 @@ async function extractKanbanBoard(object, fieldMap, schema) {
       // -- Close Date (Opportunity specific) --
       const dateEl = card.querySelector('.sfaOpportunityDealMotionCloseDate .uiOutputDate') || card.querySelector('.uiOutputDate');
       if (dateEl) extractedData['closeDate'] = dateEl.innerText.trim();
+      
+      // -- Task Specifics --
+      if (object === 'Task') {
+         // Due Date often is the only date shown
+         const taskDate = card.querySelector('.uiOutputDate');
+         if (taskDate) extractedData['dueDate'] = taskDate.innerText.trim();
+         
+         // Subject is usually the name
+         if (extractedData['name']) extractedData['subject'] = extractedData['name'];
+      }
 
       // -- Account Name (Often the second link in the card) --
       // We look for links that are NOT the primary field.
@@ -171,12 +232,6 @@ async function extractKanbanBoard(object, fieldMap, schema) {
         }
       });
       
-      // -- Owner -- 
-      // Sometimes in an image alt or specific field
-      // For now, we might leave null or try to find a user avatar
-      const ownerImg = card.querySelector('img[title], span[title]'); // simple heuristic
-      // This is unreliable without specific selectors, skipping for now to avoid bad data.
-
       // Normalize to schema
       const normalized = { object };
       schema.forEach(key => {
