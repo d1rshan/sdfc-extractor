@@ -14,7 +14,7 @@ const TABS = [
 
 const COLUMNS = {
   leads: [
-    { key: 'name', label: 'Name', className: 'text-blue-600' },
+    { key: 'name', label: 'Name', className: 'text-white font-medium' },
     { key: 'company', label: 'Company' },
     { key: 'email', label: 'Email' },
     { key: 'phone', label: 'Phone' },
@@ -23,7 +23,7 @@ const COLUMNS = {
     { key: 'leadOwner', label: 'Owner' }
   ],
   contacts: [
-    { key: 'name', label: 'Name', className: 'text-blue-600' },
+    { key: 'name', label: 'Name', className: 'text-white font-medium' },
     { key: 'email', label: 'Email' },
     { key: 'phone', label: 'Phone' },
     { key: 'accountName', label: 'Account' },
@@ -32,7 +32,7 @@ const COLUMNS = {
     { key: 'mailingAddress', label: 'Address' }
   ],
   accounts: [
-    { key: 'accountName', label: 'Account Name', className: 'text-blue-600' },
+    { key: 'accountName', label: 'Account Name', className: 'text-white font-medium' },
     { key: 'website', label: 'Website' },
     { key: 'phone', label: 'Phone' },
     { key: 'industry', label: 'Industry' },
@@ -41,7 +41,7 @@ const COLUMNS = {
     { key: 'annualRevenue', label: 'Revenue' }
   ],
   opportunities: [
-    { key: 'name', label: 'Name', className: 'text-blue-600' },
+    { key: 'name', label: 'Name', className: 'text-white font-medium' },
     { key: 'amount', label: 'Amount' },
     { key: 'stage', label: 'Stage' },
     { key: 'probability', label: 'Prob (%)' },
@@ -51,7 +51,7 @@ const COLUMNS = {
     { key: 'associatedAccount', label: 'Account' }
   ],
   tasks: [
-    { key: 'subject', label: 'Subject', className: 'text-blue-600' },
+    { key: 'subject', label: 'Subject', className: 'text-white font-medium' },
     { key: 'status', label: 'Status' },
     { key: 'dueDate', label: 'Due Date' },
     { key: 'priority', label: 'Priority' },
@@ -175,32 +175,32 @@ function App() {
   };
 
   if (loading) {
-    return <div className="flex h-screen items-center justify-center text-gray-500">Loading data...</div>;
+    return <div className="flex h-screen items-center justify-center bg-background text-text-muted">Loading data...</div>;
   }
 
   const getExtractLabel = () => {
-    if (extracting) return 'Extracting...';
-    if (!pageContext) return 'No Context';
+    if (extracting) return 'EXTRACTING...';
+    if (!pageContext) return 'NO CONTEXT';
     if (pageContext) {
       const { object, type } = pageContext;
-      const typeLabel = type === 'record' ? 'Record' : type === 'list' ? 'List' : 'Kanban';
-      return `Extract ${object} ${typeLabel}`;
+      const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+      return `EXTRACT ${object} ${typeLabel}`;
     }
-    return 'Extract';
+    return 'EXTRACT DATA';
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-background text-text-main font-sans selection:bg-white selection:text-black">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm relative">
-        <div className="flex items-center gap-2">
-           <div className="p-1.5 bg-blue-600 rounded-md">
-             <Database className="text-white w-4 h-4" />
+      <header className="bg-background/95 backdrop-blur-sm border-b border-border px-5 py-4 flex items-center justify-between z-20 sticky top-0">
+        <div className="flex items-center gap-3">
+           <div className="p-1.5 bg-white rounded-sm">
+             <Database className="text-black w-4 h-4" />
            </div>
            <div>
-             <h1 className="font-bold text-gray-800 text-sm leading-tight">SFDC Extractor</h1>
-             <p className="text-[10px] text-gray-400">
-               Synced: {data.lastSync?.[activeTab] ? format(data.lastSync[activeTab], 'MMM d, HH:mm') : 'Never'}
+             <h1 className="font-thunder text-2xl font-bold text-white uppercase tracking-wider leading-none">SFDC Extractor</h1>
+             <p className="text-[10px] text-text-muted uppercase tracking-widest mt-0.5 font-medium">
+               Synced: {data.lastSync?.[activeTab] ? format(data.lastSync[activeTab], 'MMM d, HH:mm') : 'NEVER'}
              </p>
            </div>
         </div>
@@ -210,26 +210,26 @@ function App() {
           <div className="relative" ref={exportMenuRef}>
             <button
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-xs font-medium transition-colors border border-gray-200"
+              className="flex items-center gap-1.5 bg-surface hover:bg-border text-text-main border border-border px-3 py-1.5 rounded-sm text-sm font-thunder uppercase tracking-wide transition-all duration-200"
             >
               Export
-              <ChevronDown className="w-3 h-3" />
+              <ChevronDown className="w-3 h-3 text-text-muted" />
             </button>
             
             {showExportMenu && (
-              <div className="absolute right-0 top-full mt-1 bg-white border rounded-md shadow-lg z-20 w-32 py-1">
+              <div className="absolute right-0 top-full mt-2 bg-surface border border-border rounded-sm shadow-xl z-30 w-36 overflow-hidden">
                 <button 
                   onClick={() => handleExport('csv')}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 text-left"
+                  className="flex items-center gap-2 w-full px-4 py-3 text-xs text-text-main hover:bg-border/50 text-left transition-colors font-medium"
                 >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-green-600" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-text-muted" />
                   <span>CSV</span>
                 </button>
                 <button 
                   onClick={() => handleExport('json')}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 text-left"
+                  className="flex items-center gap-2 w-full px-4 py-3 text-xs text-text-main hover:bg-border/50 text-left transition-colors font-medium border-t border-border"
                 >
-                  <FileJson className="w-3.5 h-3.5 text-yellow-600" />
+                  <FileJson className="w-3.5 h-3.5 text-text-muted" />
                   <span>JSON</span>
                 </button>
               </div>
@@ -239,7 +239,7 @@ function App() {
           <button 
             onClick={handleExtract}
             disabled={extracting || !pageContext}
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 bg-white hover:bg-gray-200 text-black px-4 py-1.5 rounded-sm text-sm font-bold font-thunder uppercase tracking-wide transition-all shadow-lg shadow-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {extracting ? <RefreshCw className="animate-spin w-3 h-3" /> : <Download className="w-3 h-3" />}
             {getExtractLabel()}
@@ -249,24 +249,25 @@ function App() {
       
       {/* Message Toast */}
       {message && (
-        <div className={`px-4 py-2 text-xs text-center text-white ${message.type === 'error' ? 'bg-red-500' : 'bg-green-500'}`}>
+        <div className={`px-4 py-3 text-xs font-bold text-center text-white font-thunder uppercase tracking-wide ${message.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
           {message.text}
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex border-b bg-white overflow-x-auto">
+      <div className="flex border-b border-border bg-background overflow-x-auto px-4 gap-6">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex-1 py-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap px-2
+            className={`py-4 text-xs font-bold uppercase tracking-widest border-b-2 transition-all whitespace-nowrap flex items-center gap-2
               ${activeTab === tab.id 
-                ? 'border-blue-600 text-blue-600 bg-blue-50/50' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'}`}
+                ? 'border-white text-white' 
+                : 'border-transparent text-text-muted hover:text-white hover:border-border'}`}
           >
             {tab.label}
-            <span className="ml-1.5 bg-gray-100 text-gray-600 py-0.5 px-1.5 rounded-full text-[10px]">
+            <span className={`py-0.5 px-1.5 rounded-full text-[10px] font-mono
+              ${activeTab === tab.id ? 'bg-white text-black' : 'bg-surface text-text-muted'}`}>
               {data[tab.id]?.length || 0}
             </span>
           </button>
@@ -274,7 +275,7 @@ function App() {
       </div>
 
       {/* Content */}
-      <main className="flex-1 overflow-hidden relative">
+      <main className="flex-1 overflow-hidden relative bg-background">
         <DataList 
           data={data[activeTab] || []}
           columns={COLUMNS[activeTab]}

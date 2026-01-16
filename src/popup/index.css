@@ -2,6 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --font-family--thunder: 'Oswald', sans-serif;
+}
+
+html, body {
+  width: 700px;
+  height: 600px;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  @apply bg-background text-text-main font-thunder antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full hover:bg-neutral-600;
+}
+
+/* Utility for the specific font variable usage if any */
+.font-thunder {
+  font-family: var(--font-family--thunder);
+}
 /* Custom Scrollbar for the table container */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
