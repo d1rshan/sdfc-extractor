@@ -260,13 +260,13 @@ function App() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 rounded-full
+            className={`px-4 py-2 text-xs font-bold font-thunder uppercase tracking-widest transition-all whitespace-nowrap flex items-center gap-2 rounded-full
               ${activeTab === tab.id 
                 ? 'bg-white text-black shadow-md transform scale-105' 
                 : 'bg-transparent text-text-muted hover:bg-surface hover:text-white'}`}
           >
             {tab.label}
-            <span className={`py-0.5 px-1.5 rounded-full text-[10px] font-mono
+            <span className={`py-0.5 px-1.5 rounded-full text-[10px] font-sans font-medium tracking-normal
               ${activeTab === tab.id ? 'bg-black text-white' : 'bg-surface text-text-muted'}`}>
               {data[tab.id]?.length || 0}
             </span>

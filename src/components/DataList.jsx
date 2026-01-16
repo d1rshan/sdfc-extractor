@@ -34,7 +34,7 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
           <input
             type="text"
             placeholder="SEARCH RECORDS..."
-            className="w-full pl-9 pr-4 py-2 bg-surface border border-border rounded-full text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-white focus:ring-0 transition-all font-medium uppercase tracking-wide"
+            className="w-full pl-9 pr-4 py-2 bg-surface border border-border rounded-full text-sm text-text-main placeholder:text-text-muted focus:outline-none focus:border-white focus:ring-0 transition-all font-sans font-medium"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -46,12 +46,12 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
           <div key={group} className="mb-6">
             {groupBy && (
               <h3 className="font-thunder text-lg font-bold text-white mb-3 px-1 sticky top-0 bg-background/95 backdrop-blur-sm py-2 border-b border-border flex justify-between items-center z-0">
-                {group} <span className="text-xs font-mono font-normal text-text-muted bg-surface px-2 py-0.5 rounded-full">{items.length}</span>
+                {group} <span className="text-xs font-sans font-medium text-text-muted bg-surface px-2 py-0.5 rounded-full">{items.length}</span>
               </h3>
             )}
             
             {items.length === 0 ? (
-               <div className="text-center text-text-muted py-8 text-sm uppercase tracking-widest font-medium">No records found</div>
+               <div className="text-center text-text-muted py-8 text-sm font-thunder uppercase tracking-widest font-medium">No records found</div>
             ) : (
               <div className="space-y-3">
                 {items.map((item, idx) => (
@@ -67,9 +67,9 @@ export const DataList = ({ data, columns, onDelete, groupBy }) => {
                     <div className="grid gap-2">
                       {columns.map((col) => (
                         <div key={col.key} className="flex flex-col sm:flex-row sm:items-baseline text-sm gap-1 sm:gap-0">
-                          <span className="text-text-muted w-24 flex-shrink-0 text-[10px] uppercase tracking-widest font-bold">{col.label}</span>
-                          <span className={clsx("font-medium truncate text-text-main", col.className)}>
-                            {item[col.key] || <span className="text-text-muted opacity-30">-</span>}
+                          <span className="text-text-muted w-24 flex-shrink-0 text-[10px] font-sans uppercase tracking-widest font-bold">{col.label}</span>
+                          <span className={clsx("font-sans font-medium truncate text-text-main", col.className)}>
+                            {item[col.key] || <span className="text-text-muted opacity-30 font-sans">-</span>}
                           </span>
                         </div>
                       ))}

@@ -34,7 +34,7 @@ class ExtractionStatusUI {
 
     const style = `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;500;600;700&display=swap');
         
         .box {
           background: #171717;
@@ -64,12 +64,11 @@ class ExtractionStatusUI {
           letter-spacing: 0.05em;
         }
         .subtext { 
-          font-size: 11px; 
+          font-family: 'Inter', sans-serif;
+          font-size: 12px; 
           color: #a3a3a3; 
-          line-height: 1.3;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          font-weight: 500;
+          line-height: 1.4;
+          font-weight: 400;
         }
         .icon { color: ${colors[state]}; display: flex; flex-shrink: 0; }
         .animate-spin { animation: spin 0.8s linear infinite; }

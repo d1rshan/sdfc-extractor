@@ -8,7 +8,7 @@ module.exports = {
     extend: {
       fontFamily: {
         'thunder': ['Oswald', 'sans-serif'],
-        'sans': ['Oswald', 'sans-serif'],
+        'sans': ['Inter', 'sans-serif'],
       },
       colors: {
         background: '#0a0a0a',
