@@ -1,42 +1,50 @@
 console.log("🔥 SCRIPT LOADED 🔥");
 
-chrome.runtime.onMessage.addListener(async (message) => {
-  if (message.type !== "EXTRACT_CURRENT_OBJECT") return;
-
-  try {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "GET_PAGE_CONTEXT") {
     const context = getPageContext();
-    
-    if (!context) {
-      console.warn("❌ Unknown Salesforce page context.");
-      return;
-    }
+    sendResponse(context);
+    return;
+  }
 
-    const { object, type } = context;
-    const mapping = FIELD_MAPPINGS[object];
-    const schema = OBJECT_SCHEMAS[object];
+  if (message.type === "EXTRACT_CURRENT_OBJECT") {
+    (async () => {
+      try {
+        const context = getPageContext();
+        
+        if (!context) {
+          console.warn("❌ Unknown Salesforce page context.");
+          return;
+        }
 
-    if (!mapping || !schema) {
-      console.warn(`❌ No configuration found for object: ${object}`);
-      return;
-    }
+        const { object, type } = context;
+        const mapping = FIELD_MAPPINGS[object];
+        const schema = OBJECT_SCHEMAS[object];
 
-    let data;
-    if (type === 'record') {
-      data = await extractRecord(object, mapping, schema);
-    } else if (type === 'list') {
-      data = await extractListView(object, mapping, schema);
-    } else if (type === 'kanban') {
-      data = await extractKanbanBoard(object, mapping, schema);
-    }
+        if (!mapping || !schema) {
+          console.warn(`❌ No configuration found for object: ${object}`);
+          return;
+        }
 
-    console.log(`✅ ${type} extracted (${object}):`, data);
+        let data;
+        if (type === 'record') {
+          data = await extractRecord(object, mapping, schema);
+        } else if (type === 'list') {
+          data = await extractListView(object, mapping, schema);
+        } else if (type === 'kanban') {
+          data = await extractKanbanBoard(object, mapping, schema);
+        }
 
-    chrome.runtime.sendMessage({
-      type: "SAVE_EXTRACTED_DATA",
-      payload: { object, data }
-    });
+        console.log(`✅ ${type} extracted (${object}):`, data);
 
-  } catch (err) {
-    console.error("Extraction failed:", err);
+        chrome.runtime.sendMessage({
+          type: "SAVE_EXTRACTED_DATA",
+          payload: { object, data }
+        });
+
+      } catch (err) {
+        console.error("Extraction failed:", err);
+      }
+    })();
   }
 });

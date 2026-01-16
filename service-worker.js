@@ -22,7 +22,13 @@ async function initStorage() {
       accounts: [],
       opportunities: [],
       tasks: [],
-      lastSync: 0
+      lastSync: {
+        leads: 0,
+        contacts: 0,
+        accounts: 0,
+        opportunities: 0,
+        tasks: 0
+      }
     };
     await chrome.storage.local.set({ [STORAGE_KEY]: initialData });
   }
@@ -88,8 +94,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           accounts: [],
           opportunities: [],
           tasks: [],
-          lastSync: 0
+          lastSync: {
+            leads: 0,
+            contacts: 0,
+            accounts: 0,
+            opportunities: 0,
+            tasks: 0
+          }
         };
+
+        // Migration: If lastSync is a number (old format), convert to object
+        if (typeof storageData.lastSync !== 'object') {
+          storageData.lastSync = {
+            leads: 0,
+            contacts: 0,
+            accounts: 0,
+            opportunities: 0,
+            tasks: 0
+          };
+        }
 
         const incomingData = Array.isArray(data) ? data : [data];
         const currentRecords = storageData[schemaKey] || [];
@@ -97,7 +120,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const updatedRecords = mergeRecords(currentRecords, incomingData);
         
         storageData[schemaKey] = updatedRecords;
-        storageData.lastSync = Date.now();
+        
+        // Update specific object sync time
+        storageData.lastSync[schemaKey] = Date.now();
 
         await chrome.storage.local.set({ [STORAGE_KEY]: storageData });
         
