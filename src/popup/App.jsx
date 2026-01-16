@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSalesforceData } from '../hooks/useSalesforceData';
 import { DataList } from '../components/DataList';
-import { Download, Database, RefreshCw, AlertCircle } from 'lucide-react';
+import { Download, Database, RefreshCw, AlertCircle, FileJson, FileSpreadsheet, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 
 const TABS = [
@@ -66,6 +66,8 @@ function App() {
   const [extracting, setExtracting] = useState(false);
   const [message, setMessage] = useState(null);
   const [pageContext, setPageContext] = useState(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef(null);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -83,6 +85,15 @@ function App() {
       }
     };
     fetchContext();
+
+    // Close export menu on click outside
+    const handleClickOutside = (event) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleExtract = async () => {
@@ -116,6 +127,53 @@ function App() {
     }
   };
 
+  const handleExport = (exportFormat) => {
+    const currentData = data[activeTab] || [];
+    if (currentData.length === 0) {
+      setMessage({ type: 'error', text: 'No data to export.' });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
+    let content = '';
+    let mimeType = '';
+    let extension = '';
+
+    if (exportFormat === 'json') {
+      content = JSON.stringify(currentData, null, 2);
+      mimeType = 'application/json';
+      extension = 'json';
+    } else if (exportFormat === 'csv') {
+      const cols = COLUMNS[activeTab];
+      const headers = cols.map(c => c.label).join(',');
+      const rows = currentData.map(row => {
+        return cols.map(col => {
+          const val = row[col.key] || '';
+          // Escape quotes and wrap in quotes if needed
+          const stringVal = String(val).replace(/"/g, '""');
+          return `"${stringVal}"`;
+        }).join(',');
+      }).join('\n');
+      content = `${headers}\n${rows}`;
+      mimeType = 'text/csv';
+      extension = 'csv';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `salesforce_${activeTab}_${format(new Date(), 'yyyyMMdd_HHmm')}.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    setMessage({ type: 'success', text: `Exported ${activeTab} as ${exportFormat.toUpperCase()}` });
+    setTimeout(() => setMessage(null), 3000);
+    setShowExportMenu(false);
+  };
+
   if (loading) {
     return <div className="flex h-screen items-center justify-center text-gray-500">Loading data...</div>;
   }
@@ -134,7 +192,7 @@ function App() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm">
+      <header className="bg-white border-b px-4 py-3 flex items-center justify-between shadow-sm relative">
         <div className="flex items-center gap-2">
            <div className="p-1.5 bg-blue-600 rounded-md">
              <Database className="text-white w-4 h-4" />
@@ -147,14 +205,46 @@ function App() {
            </div>
         </div>
 
-        <button 
-          onClick={handleExtract}
-          disabled={extracting || !pageContext}
-          className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {extracting ? <RefreshCw className="animate-spin w-3 h-3" /> : <Download className="w-3 h-3" />}
-          {getExtractLabel()}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Export Dropdown */}
+          <div className="relative" ref={exportMenuRef}>
+            <button
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-xs font-medium transition-colors border border-gray-200"
+            >
+              Export
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1 bg-white border rounded-md shadow-lg z-20 w-32 py-1">
+                <button 
+                  onClick={() => handleExport('csv')}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 text-left"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-green-600" />
+                  <span>CSV</span>
+                </button>
+                <button 
+                  onClick={() => handleExport('json')}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 text-left"
+                >
+                  <FileJson className="w-3.5 h-3.5 text-yellow-600" />
+                  <span>JSON</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button 
+            onClick={handleExtract}
+            disabled={extracting || !pageContext}
+            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {extracting ? <RefreshCw className="animate-spin w-3 h-3" /> : <Download className="w-3 h-3" />}
+            {getExtractLabel()}
+          </button>
+        </div>
       </header>
       
       {/* Message Toast */}
